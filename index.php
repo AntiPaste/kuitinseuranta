@@ -9,7 +9,7 @@ $db = new MySQLi(
 	$config['database']['host'],
 	$config['database']['username'],
 	$config['database']['password'],
-	$config['database']['database'],
+	$config['database']['database']
 );
 
 if ($db->connect_errno) {
