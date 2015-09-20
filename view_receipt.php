@@ -1,20 +1,3 @@
-<?php
-
-require_once 'config.php';
-
-$db = new MySQLi(
-	$config['database']['host'],
-	$config['database']['username'],
-	$config['database']['password'],
-	$config['database']['database']
-);
-
-if ($db->connect_errno) {
-	die('No database connection.');
-}
-
-?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -33,7 +16,7 @@ if ($db->connect_errno) {
 			</div>
 			<div id="navbar" class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
-					<li class="active"><a href="/">Etusivu</a></li>
+					<li><a href="/">Etusivu</a></li>
 					<li><a href="/list_receipts.php">Kuitit</a></li>
 					<li><a href="/list_categories.php">Kategoriat</a></li>
 				</ul>
@@ -42,9 +25,25 @@ if ($db->connect_errno) {
 	</nav>
 	
 	<div class="container">
-		<div class="jumbotron">
-			<h1>Kuittiseuranta</h1>
-			<p>Tähän jotain sepostusta käyttötarkoituksista jne.</p>
+		<div id="names" class="pull-left">
+			<div class="text-info">Kuitin ID:</div>
+			<div class="text-info">Ostotapahtuman sijainti:</div>
+			<div class="text-info">Ostotapahtuman päivämäärä:</div>
+			<div class="text-info">Ostosten summa:</div>
+		</div>
+		
+		<div id="data" class="pull-left" style="margin-left: 20px;">
+			<div>123</div>
+			<div>UniCafe</div>
+			<div>18.9.2015 12:00</div> 
+			<div>2.60€</div>
+		</div>
+		
+		<div class="clearfix"></div>
+		
+		<div class="container" style="margin-top: 20px;">
+			<a class="btn btn-warning" href="/edit_receipt.php">Muokkaa tietoja</a>
+			<a class="btn btn-danger" href="#">Poista kuitti</a>
 		</div>
 	</div>
 </body>

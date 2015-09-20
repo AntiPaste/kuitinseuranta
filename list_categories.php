@@ -1,20 +1,3 @@
-<?php
-
-require_once 'config.php';
-
-$db = new MySQLi(
-	$config['database']['host'],
-	$config['database']['username'],
-	$config['database']['password'],
-	$config['database']['database']
-);
-
-if ($db->connect_errno) {
-	die('No database connection.');
-}
-
-?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -33,19 +16,33 @@ if ($db->connect_errno) {
 			</div>
 			<div id="navbar" class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
-					<li class="active"><a href="/">Etusivu</a></li>
+					<li><a href="/">Etusivu</a></li>
 					<li><a href="/list_receipts.php">Kuitit</a></li>
-					<li><a href="/list_categories.php">Kategoriat</a></li>
+					<li class="active"><a href="/list_categories.php">Kategoriat</a></li>
 				</ul>
 			</div>
 		</div>
 	</nav>
 	
 	<div class="container">
-		<div class="jumbotron">
-			<h1>Kuittiseuranta</h1>
-			<p>Tähän jotain sepostusta käyttötarkoituksista jne.</p>
-		</div>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Nimi</th>
+					<th>Kokonaissumma</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><a href="/view_category.php">123</a></td>
+					<td>Sekalaiset</td>
+					<td>7.80€</td>
+					<td><a href="/view_category.php">Katsele</a></td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 </body>
 </html>

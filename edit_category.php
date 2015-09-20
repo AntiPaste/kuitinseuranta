@@ -1,20 +1,3 @@
-<?php
-
-require_once 'config.php';
-
-$db = new MySQLi(
-	$config['database']['host'],
-	$config['database']['username'],
-	$config['database']['password'],
-	$config['database']['database']
-);
-
-if ($db->connect_errno) {
-	die('No database connection.');
-}
-
-?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -33,7 +16,7 @@ if ($db->connect_errno) {
 			</div>
 			<div id="navbar" class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
-					<li class="active"><a href="/">Etusivu</a></li>
+					<li><a href="/">Etusivu</a></li>
 					<li><a href="/list_receipts.php">Kuitit</a></li>
 					<li><a href="/list_categories.php">Kategoriat</a></li>
 				</ul>
@@ -42,9 +25,21 @@ if ($db->connect_errno) {
 	</nav>
 	
 	<div class="container">
-		<div class="jumbotron">
-			<h1>Kuittiseuranta</h1>
-			<p>Tähän jotain sepostusta käyttötarkoituksista jne.</p>
+		<div>
+			<div class="form-group">
+				<label>ID</label>
+				<input type="text" class="form-control" placeholder="123" disabled="disabled" />
+			</div>
+			
+			<div class="form-group">
+				<label>Nimi</label>
+				<input type="text" class="form-control" placeholder="Sekalaiset" />
+			</div>
+		</div>
+		
+		<div class="container" style="margin-top: 20px;">
+			<a class="btn btn-success" href="#">Tallenna</a>
+			<a class="btn btn-warning" href="#">Peruuta</a>
 		</div>
 	</div>
 </body>
