@@ -20,7 +20,7 @@ $alertClass = new Alert();
 $userClass = new User($db);
 
 if (!$userClass->isLoggedIn()) {
-	$alertClass->addAlert('Sinun täytyy olla kirjautuneen sisään katsellaksesi kategorioita', 'error');
+	$alertClass->addAlert('Sinun täytyy olla kirjautuneen sisään poistaaksesi kategorioita', 'error');
 	$alertClass->redirect('/login.php');
 }
 
@@ -44,27 +44,5 @@ if ($category['userID'] !== $user['id']) {
 	$alertClass->redirect('/list_categories.php');
 }
 
-require_once 'header.php';
-
-?>
-
-		<div id="names" class="pull-left">
-			<div class="text-info">Kategorian ID:</div>
-			<div class="text-info">Kategorian nimi:</div>
-			<div class="text-info">Kuittien kokonaissumma:</div>
-		</div>
-		
-		<div id="data" class="pull-left" style="margin-left: 20px;">
-			<div><?= $category['id'] ?></div>
-			<div><?= $category['name'] ?></div>
-			<div><?= $category['total_sum'] ?></div> 
-		</div>
-		
-		<div class="clearfix"></div>
-		
-		<div class="container" style="margin-top: 20px;">
-			<a class="btn btn-warning" href="/edit_category.php?id=<?= $category['id'] ?>">Muokkaa kategoriaa</a>
-			<a class="btn btn-danger" href="/remove_category.php?id=<?= $category['id'] ?>">Poista kategoria</a>
-		</div>
-
-<?php require_once 'footer.php'; ?>
+$categoryClass->removeCategory($_GET['id']);
+header('Location: /list_categories.php');

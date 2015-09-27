@@ -1,30 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	
-	<link href="/css/bootstrap.min.css" rel="stylesheet" />
-	
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-	<script src="/js/bootstrap.min.js" type="text/javascript"></script>
-</head>
-<body>
-	<nav class="navbar navbar-default navbar-static-top">
-		<div class="container">
-			<div class="navbar-header">
-				<a class="navbar-brand" href="/">Kuittiseuranta</a>
-			</div>
-			<div id="navbar" class="navbar-collapse collapse">
-				<ul class="nav navbar-nav">
-					<li><a href="/">Etusivu</a></li>
-					<li><a href="/list_receipts.php">Kuitit</a></li>
-					<li><a href="/list_categories.php">Kategoriat</a></li>
-				</ul>
-			</div>
-		</div>
-	</nav>
-	
-	<div class="container">
+<?php
+
+require_once './config.php';
+require_once './lib/alert.class.php';
+require_once './lib/user.class.php';
+require_once './lib/receipt.class.php';
+
+$db = new MySQLi(
+	$config['database']['host'],
+	$config['database']['username'],
+	$config['database']['password'],
+	$config['database']['database']
+);
+
+if ($db->connect_errno) {
+	die('Ei tietokantayhteyttä.');
+}
+
+$alertClass = new Alert();
+$userClass = new User($db);
+
+if (!$userClass->isLoggedIn()) {
+	$alertClass->addAlert('Sinun täytyy olla kirjautuneen sisään katsellaksesi kuitteja', 'error');
+	$alertClass->redirect('/login.php');
+}
+
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+	$alertClass->addAlert('Kuitin ID oli tyhjä');
+	$alertClass->redirect('/list_receipts.php');
+}
+
+$user = $userClass->getCurrentUser();
+
+$receiptClass = new Receipt($db);
+$receipt = $receiptClass->getReceipt($_GET['id']);
+
+if ($receipt === null) {
+	$alertClass->addAlert('Kuittia ei löytynyt');
+	$alertClass->redirect('/list_receipts.php');
+}
+
+if ($receipt['userID'] !== $user['id']) {
+	$alertClass->addAlert('Sinulla ei ole oikeuksia tähän kuittiin');
+	$alertClass->redirect('/list_receipts.php');
+}
+
+require_once 'header.php';
+
+?>
+
 		<div id="names" class="pull-left">
 			<div class="text-info">Kuitin ID:</div>
 			<div class="text-info">Ostotapahtuman sijainti:</div>
@@ -33,18 +56,17 @@
 		</div>
 		
 		<div id="data" class="pull-left" style="margin-left: 20px;">
-			<div>123</div>
-			<div>UniCafe</div>
-			<div>18.9.2015 12:00</div> 
-			<div>2.60€</div>
+			<div><?= $receipt['id'] ?></div>
+			<div><?= $receipt['location'] ?></div>
+			<div><?= $receipt['date'] ?></div> 
+			<div><?= $receipt['sum'] ?>€</div>
 		</div>
 		
 		<div class="clearfix"></div>
 		
 		<div class="container" style="margin-top: 20px;">
-			<a class="btn btn-warning" href="/edit_receipt.php">Muokkaa tietoja</a>
-			<a class="btn btn-danger" href="#">Poista kuitti</a>
+			<a class="btn btn-warning" href="/edit_receipt.php?id=<?= $receipt['id'] ?>">Muokkaa tietoja</a>
+			<a class="btn btn-danger" href="/remove_receipt.php?id=<?= $receipt['id'] ?>">Poista kuitti</a>
 		</div>
-	</div>
-</body>
-</html>
+
+<?php require_once 'footer.php'; ?>

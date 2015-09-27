@@ -1,13 +1,74 @@
 <?php
 
-class Receipt {
+class User {
 	private $database;
 	
 	public function __construct($database) {
 		$this->database = $database;
 	}
 	
-	public function getAllReceipts($userID) {
+	public function getCurrentUser() {
+		if (!$this->isLoggedIn()) return null;
+		
+		$statement = $this->database->prepare("SELECT username, password FROM users WHERE id = ?;");
+		$statement->bind_param('i', $_SESSION['userID']);
+		$statement->execute();
+		$statement->bind_result($username, $password);
+		$statement->store_result();
+		
+		$statement->fetch();
+		if ($statement->num_rows === 0) {
+			die('Invalid user!');
+		}
+		
+		$user = array(
+			'id' => $_SESSION['userID'],
+			'username' => $username,
+			'password' => $password,
+		);
+		
+		$statement->free_result();
+		$statement->close();
+		
+		return $user;
+	}
+	
+	public function isLoggedIn() {
+		return (!empty($_SESSION['userID']));
+	}
+	
+	public function authenticate($username, $password) {
+		if ($this->isLoggedIn()) die('You are already logged in');
+		
+		$statement = $this->database->prepare("SELECT id, username, password FROM users WHERE username = ?;");
+		$statement->bind_param('s', $username);
+		$statement->execute();
+		$statement->bind_result($userID, $username, $hash);
+		$statement->store_result();
+		
+		$statement->fetch();
+		if ($statement->num_rows === 0) {
+			return null;
+		}
+		
+		if (password_verify($password, $hash) !== true) {
+			return null;
+		}
+		
+		$user = array(
+			'id' => $userID,
+			'username' => $username,
+			'password' => $hash,
+		);
+		
+		$statement->free_result();
+		$statement->close();
+		
+		$_SESSION['userID'] = $userID;
+		return $user;
+	}
+	
+	/*public function getAllReceipts($userID) {
 		$receipts = array();
 		
 		$statement = $this->database->prepare("SELECT id, location, date, sum FROM receipts WHERE user_id = ?;");
@@ -80,5 +141,5 @@ class Receipt {
 		$statement->bind_param('i', $receiptID);
 		$statement->execute();
 		$statement->close();
-	}
+	}*/
 }

@@ -1,30 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	
-	<link href="/css/bootstrap.min.css" rel="stylesheet" />
-	
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-	<script src="/js/bootstrap.min.js" type="text/javascript"></script>
-</head>
-<body>
-	<nav class="navbar navbar-default navbar-static-top">
-		<div class="container">
-			<div class="navbar-header">
-				<a class="navbar-brand" href="/">Kuittiseuranta</a>
-			</div>
-			<div id="navbar" class="navbar-collapse collapse">
-				<ul class="nav navbar-nav">
-					<li><a href="/">Etusivu</a></li>
-					<li class="active"><a href="/list_receipts.php">Kuitit</a></li>
-					<li><a href="/list_categories.php">Kategoriat</a></li>
-				</ul>
-			</div>
-		</div>
-	</nav>
-	
-	<div class="container">
+<?php
+
+require_once './config.php';
+require_once './lib/alert.class.php';
+require_once './lib/user.class.php';
+require_once './lib/receipt.class.php';
+
+$db = new MySQLi(
+	$config['database']['host'],
+	$config['database']['username'],
+	$config['database']['password'],
+	$config['database']['database']
+);
+
+if ($db->connect_errno) {
+	die('Ei tietokantayhteyttä.');
+}
+
+$alertClass = new Alert();
+$userClass = new User($db);
+
+if (!$userClass->isLoggedIn()) {
+	$alertClass->addAlert('Sinun täytyy olla kirjautuneen sisään katsellaksesi kuitteja', 'error');
+	$alertClass->redirect('/login.php');
+}
+
+$user = $userClass->getCurrentUser();
+
+$receiptClass = new Receipt($db);
+$receipts = $receiptClass->getAllReceipts($user['id']);
+
+$active = 'receipts';
+require_once 'header.php';
+
+?>
+
 		<table class="table">
 			<thead>
 				<tr>
@@ -35,26 +44,18 @@
 				</tr>
 			</thead>
 			<tbody>
+				<?php foreach ($receipts as $receipt): ?>
 				<tr>
-					<td><a href="/view_receipt.php">123</a></td>
-					<td>UniCafe</td>
-					<td>18.9.2015</td>
-					<td>2.60€</td>
+					<td>
+						<a href="/view_receipt.php?id=<?= $receipt['id'] ?>"><?= $receipt['id'] ?></a>
+					</td>
+					
+					<td><?= $receipt['location'] ?></td>
+					<td><?= $receipt['date'] ?></td>
+					<td><?= $receipt['sum'] ?>€</td>
 				</tr>
-				<tr>
-					<td><a href="/view_receipt.php">124</a></td>
-					<td>UniCafe</td>
-					<td>19.9.2015</td>
-					<td>2.60€</td>
-				</tr>
-				<tr>
-					<td><a href="/view_receipt.php">125</a></td>
-					<td>UniCafe</td>
-					<td>20.9.2015</td>
-					<td>2.60€</td>
-				</tr>
+				<?php endforeach; ?>
 			</tbody>
 		</table>
-	</div>
-</body>
-</html>
+
+<?php require_once 'footer.php'; ?>

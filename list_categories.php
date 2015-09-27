@@ -1,30 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	
-	<link href="/css/bootstrap.min.css" rel="stylesheet" />
-	
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-	<script src="/js/bootstrap.min.js" type="text/javascript"></script>
-</head>
-<body>
-	<nav class="navbar navbar-default navbar-static-top">
-		<div class="container">
-			<div class="navbar-header">
-				<a class="navbar-brand" href="/">Kuittiseuranta</a>
-			</div>
-			<div id="navbar" class="navbar-collapse collapse">
-				<ul class="nav navbar-nav">
-					<li><a href="/">Etusivu</a></li>
-					<li><a href="/list_receipts.php">Kuitit</a></li>
-					<li class="active"><a href="/list_categories.php">Kategoriat</a></li>
-				</ul>
-			</div>
-		</div>
-	</nav>
-	
-	<div class="container">
+<?php
+
+require_once './config.php';
+require_once './lib/alert.class.php';
+require_once './lib/user.class.php';
+require_once './lib/category.class.php';
+
+$db = new MySQLi(
+	$config['database']['host'],
+	$config['database']['username'],
+	$config['database']['password'],
+	$config['database']['database']
+);
+
+if ($db->connect_errno) {
+	die('Ei tietokantayhteyttä.');
+}
+
+$alertClass = new Alert();
+$userClass = new User($db);
+
+if (!$userClass->isLoggedIn()) {
+	$alertClass->addAlert('Sinun täytyy olla kirjautuneen sisään katsellaksesi kategorioita', 'error');
+	$alertClass->redirect('/login.php');
+}
+
+$user = $userClass->getCurrentUser();
+
+$categoryClass = new Category($db);
+$categories = $categoryClass->getAllCategories($user['id']);
+
+$active = 'categories';
+require_once 'header.php';
+
+?>
+
 		<table class="table">
 			<thead>
 				<tr>
@@ -35,14 +44,15 @@
 				</tr>
 			</thead>
 			<tbody>
+				<?php foreach ($categories as $category): ?>
 				<tr>
-					<td><a href="/view_category.php">123</a></td>
-					<td>Sekalaiset</td>
-					<td>7.80€</td>
-					<td><a href="/view_category.php">Katsele</a></td>
+					<td><a href="/view_category.php?id=<?= $category['id'] ?>"><?= $category['id'] ?></a></td>
+					<td><?= $category['name'] ?></td>
+					<td><?= $category['total_sum'] ?>€</td>
+					<td><a href="/view_category.php?id=<?= $category['id'] ?>">Katsele</a></td>
 				</tr>
+				<?php endforeach; ?>
 			</tbody>
 		</table>
-	</div>
-</body>
-</html>
+
+<?php require_once 'footer.php'; ?>
